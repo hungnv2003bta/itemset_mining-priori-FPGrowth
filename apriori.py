@@ -24,6 +24,8 @@ def create_invoice_product_df(dataframe, id=False):
 
 def preprocessData(df):
     df.dropna(inplace=True)
+    # Delete if the product name contains "POST":
+    df = df[~df["Description"].str.contains("POST", na=False)]
     df = df[~df["Invoice"].str.contains("C", na=False)]
     
     num_cols = [col for col in df.columns if df[col].dtypes in ["int64", "float64"] and "ID" not in col]
@@ -36,13 +38,18 @@ def preprocessData(df):
     
     return gr_inv_pro_df
 
-def runApriori(data, minSupport=0.01, minConfidence=0.5):
+def check_id(data, product_id):
+    # Find Product name with Stock Code
+    product_name = data[data["StockCode"] == product_id]["Description"].values[0]
+    return product_id, product_name
+
+def runApriori(data, minSupport, minConfidence):
     # gr_inv_pro_df = preprocessData(data)
 
     frequent_itemsets = apriori(data, min_support=minSupport, use_colnames=True)
-    rules = association_rules(frequent_itemsets, num_itemsets=len(frequent_itemsets), metric="confidence", min_threshold=minConfidence)
+    rules = association_rules(frequent_itemsets, num_itemsets=len(frequent_itemsets), metric="support", min_threshold=minConfidence)
 
-    sorted_rules = rules.sort_values("confidence", ascending=False)
+    sorted_rules = rules.sort_values("support", ascending=False)
     return frequent_itemsets, sorted_rules
 
 def to_str_results(frequent_itemsets, rules):
@@ -60,11 +67,41 @@ def to_str_results(frequent_itemsets, rules):
 
     return itemsets_str, rules_str
 
-def recommendation_system(product_id, support_val, num_of_products, sorted_rules):
-    recommendation_list = []
-    for idx, product in enumerate(sorted_rules['antecedents']):
-        for j in list(product):
-            if j == product_id: 
-                recommendation_list.append(list(sorted_rules.iloc[idx]["consequents"])[0])
-                recommendation_list = list( dict.fromkeys(recommendation_list))
-    return (recommendation_list[:num_of_products])
+def recommendation_system(product_id, num_of_products, sorted_rules):
+    # Validate input
+    if not sorted_rules.empty and 'antecedents' in sorted_rules.columns and 'consequents' in sorted_rules.columns:
+        # Initialize recommendation set to avoid duplicates
+        recommendation_list = []
+
+        # Iterate through the rules
+        for idx, row in sorted_rules.iterrows():
+            antecedents = row['antecedents']
+            consequents = row['consequents']
+
+            # Check if the product_id is in the antecedents
+            if product_id in antecedents:
+                # Add consequents to recommendations
+                recommendation_list.append(list(sorted_rules.iloc[idx]['consequents'])[0])
+                recommendation_list = list( dict.fromkeys(recommendation_list) )
+
+        # # Convert to list and limit the number of products
+        # recommendation_list = list(recommendation_set)
+        return recommendation_list[0:num_of_products] if recommendation_list else ["No recommendations found"]
+    else:
+        return ["Invalid sorted_rules data"]
+  
+def recommendation_system_func(df, product_id, num_of_products, sorted_rules):
+    if product_id in list(df["StockCode"]):
+        recommendation_list = recommendation_system(product_id, num_of_products, sorted_rules)
+        result = []
+        if len(recommendation_list) == 0:
+            return "No recommendations found for the given Product ID."
+        else:
+            for i in range(0, len(recommendation_list[0:num_of_products])):
+                result.append(check_id(df, recommendation_list[i]))
+        return result
+    else: 
+        return "Invalid Product ID"
+
+
+    
