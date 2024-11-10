@@ -27,6 +27,28 @@ def reset_recommendation_click():
 def main():
     st.markdown("# Apriori Algorithm")
 
+    # add info using side bar
+    st.sidebar.markdown("**ABOUT DATASET**")
+    st.sidebar.markdown("*Dataset Story*")
+    st.sidebar.markdown("""
+    - Bộ dữ liệu Online Retail II, bao gồm dữ liệu bán hàng của cửa hàng bán hàng trực tuyến tại Vương quốc Anh, đã được sử dụng.
+    - Dữ liệu bán hàng từ 01/12/2009 - 09/12/2011 được bao gồm trong bộ dữ liệu.
+    - Danh mục sản phẩm của công ty này bao gồm quà lưu niệm.
+    """)
+
+    st.sidebar.markdown("*INFO ABOUT THE VARIABLES*")
+    st.sidebar.markdown("""
+    - **InvoiceNo**: Số hóa đơn -> Nếu mã này bắt đầu bằng C, điều đó có nghĩa là giao dịch đã bị hủy.
+    - **StockCode**: Mã sản phẩm -> Số duy nhất cho mỗi sản phẩm.
+    - **Description**: Tên sản phẩm.
+    - **Quantity**: Số lượng sản phẩm -> số lượng sản phẩm trên hóa đơn đã được bán.
+    - **InvoiceDate**: Ngày lập hóa đơn.
+    - **UnitPrice**: Giá mỗi đơn vị sản phẩm.
+    - **CustomerID**: Số khách hàng duy nhất.
+    - **Country**: Quốc gia nơi khách hàng cư trú.
+    """)
+
+
     # Load and display the dataset
     try:
         df = pd.read_excel('online_retail_II.xlsx', sheet_name='Year 2010-2011')
