@@ -59,6 +59,7 @@ def main():
 
         # Preprocess the dataset
         dataset = preprocessData(df)
+
     except FileNotFoundError:
         st.error("The dataset file 'online_retail_II.xlsx' was not found. Please check the file path.")
         st.stop()
@@ -67,8 +68,8 @@ def main():
 
     # Input sliders for support and confidence inside a form
     with st.form(key='apriori_form'):
-        support = st.slider("Minimum Support Value", min_value=0.0, max_value=0.99, value=0.05, key='support_slider')
-        confidence = st.slider("Minimum Confidence Value", min_value=0.0, max_value=0.99, value=0.01, key='confidence_slider')
+        support = st.slider("Minimum Support Value", min_value=0.0, max_value=1.00, value=0.05, key='support_slider')
+        confidence = st.slider("Minimum Confidence Value", min_value=0.00, max_value=1.00, value=0.01, key='confidence_slider')
         submit_button = st.form_submit_button(label='Run Apriori', on_click=run_apriori_click)
 
     # Run the Apriori algorithm if the button was clicked
@@ -104,32 +105,22 @@ def main():
     st.markdown("### Recommend Products based on a Product ID and association rules")
 
     with st.form(key='recommendation_form'):
-        product_id = st.text_input("Enter a Product ID (e.g., '22326')", "22326").strip()
-        num_of_products_input = st.text_input("Enter the Number of Products to Recommend", "5")
+        product_ids = st.multiselect("Select products for recommendation", list(df["StockCode"].unique()))
+        num_of_products_input = st.slider("Number of recommendations", min_value=1, max_value=30, value=5)
         submit_recommendation = st.form_submit_button(label='Run Recommendation', on_click=run_recommendation_click)
-
-    try:
-        num_of_products = int(num_of_products_input)
-        if num_of_products <= 0:
-            st.error("Number of products must be a positive integer.")
-            num_of_products = 5
-    except ValueError:
-        st.error("Please enter a valid integer for the number of products.")
-        num_of_products = 5
 
     if st.session_state.clicks.get('run_recommendation', False):
         # Generate recommendations if Apriori was run
         if st.session_state.clicks.get('run_apriori', False):
             try:
-                recommended_products = recommendation_system_func(df, product_id, num_of_products, st.session_state['sorted_rules'])
-                if recommended_products:
-                    if recommended_products == "Invalid Product ID":
-                        st.warning("Invalid Product ID. Please enter a valid Product ID.")
-                    else:
-                        product_name = check_id(df, product_id)[1]
-                        st.markdown(f"#### Recommended Products with id: {product_id} - name: {product_name}")
-                        recommended_df = pd.DataFrame(recommended_products, columns=["product_id", "name"])
-                        st.write(recommended_df)
+                recommended_products = recommendation_system_func(df, product_ids, num_of_products_input, st.session_state['sorted_rules'])
+
+                st.markdown("#### Recommended Products with id and name:")
+                if not recommended_products.empty:
+                    for id in product_ids : 
+                        product_id, product_name = check_id(df, id)
+                        st.markdown(f"##### {product_id} -  {product_name}")
+                    st.table(recommended_products)
                 else:
                     st.warning("No recommendations found for the given Product ID.")
             except Exception as e:
