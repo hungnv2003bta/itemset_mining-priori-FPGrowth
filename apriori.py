@@ -48,9 +48,9 @@ def runApriori(data, minSupport, minConfidence):
 
     frequent_itemsets = apriori(data, min_support=minSupport, use_colnames=True)
     
-    rules = association_rules(frequent_itemsets, metric="support",num_itemsets=len(frequent_itemsets), min_threshold=minSupport)
+    rules = association_rules(frequent_itemsets, metric="support",num_itemsets=len(frequent_itemsets), min_threshold=minConfidence)
 
-    sorted_rules = rules.sort_values("support", ascending=False)
+    sorted_rules = rules.sort_values("confidence", ascending=False)
     return frequent_itemsets, sorted_rules
 
 def to_str_results(frequent_itemsets, rules):
@@ -69,41 +69,53 @@ def to_str_results(frequent_itemsets, rules):
 
     return itemsets_str, rules_str
 
-def recommendation_system(product_id, num_of_products, sorted_rules):
-    # Validate input
-    if not sorted_rules.empty and 'antecedents' in sorted_rules.columns and 'consequents' in sorted_rules.columns:
-        # Initialize recommendation set to avoid duplicates
-        recommendation_list = []
+# def recommendation_system(product_ids, num_of_products, sorted_rules):
+#     # Validate input
+#     if not sorted_rules.empty and 'antecedents' in sorted_rules.columns and 'consequents' in sorted_rules.columns:
+#         # Initialize recommendation set to avoid duplicates
+#         recommendation_list = []
 
-        # Iterate through the rules
-        for idx, row in sorted_rules.iterrows():
-            antecedents = row['antecedents']
-            consequents = row['consequents']
+#         # Iterate through the rules
+#         for idx, row in sorted_rules.iterrows():
+#             # antecedents = row['antecedents']
+#             antecedents = set(row['antecedents'])
+#             consequents = row['consequents']
+#             confidence = row['confidence']
 
-            # Check if the product_id is in the antecedents
-            if product_id in antecedents:
-                # Add consequents to recommendations
-                recommendation_list.extend(list(consequents))
-                recommendation_list = list( dict.fromkeys(recommendation_list) )
+#             if antecedents.issubset(set(product_ids)):
+#                 for consequent in consequents:
+#                     recommendation_list.append((consequent, confidence))
+                    
+#         recommendation_list = sorted(recommendation_list, key=lambda x: x[1], reverse=True)
+#         return recommendation_list[0:num_of_products] if recommendation_list else ["No recommendations found"]
+#     else:
+#         return ["Invalid sorted_rules data"]
 
-        # # Convert to list and limit the number of products
-        # recommendation_list = list(recommendation_set)
-        return recommendation_list[0:num_of_products] if recommendation_list else ["No recommendations found"]
-    else:
-        return ["Invalid sorted_rules data"]
-  
-def recommendation_system_func(df, product_id, num_of_products, sorted_rules):
-    if product_id in list(df["StockCode"]):
-        recommendation_list = recommendation_system(product_id, num_of_products, sorted_rules)
-        result = []
-        if len(recommendation_list) == 0:
-            return "No recommendations found for the given Product ID."
-        else:
-            for i in range(0, len(recommendation_list[0:num_of_products])):
-                result.append(check_id(df, recommendation_list[i]))
-        return result
-    else: 
-        return "Invalid Product ID"
+def recommendation_system(input_products, num_of_products, rules_df):    
+    recommendations = []
 
+    for _, rule in rules_df.iterrows():
+        antecedents = set(rule['antecedents'])
+        consequents = rule['consequents']
+        confidence = rule['confidence']
+        
+        # Check if all input products are in the antecedents of the rule
+        if antecedents.issubset(set(input_products)):
+            for consequent in consequents:
+                recommendations.append((consequent, confidence))
+                
+    # Sort by confidence and return the top N recommendations
+    recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)
+    return recommendations[:num_of_products]
 
+def recommendation_system_func(df, input_products, num_of_products, sorted_rules):    
+    recommendations = recommendation_system(input_products, num_of_products, sorted_rules)
+    result = []
+
+    for product_id, confidence in recommendations:
+        if product_id in df['StockCode'].values:
+            product_name = df[df['StockCode'] == product_id]['Description'].values[0]
+            result.append({'ProductID': product_id, 'ProductName': product_name, 'Confidence': confidence})
     
+    result_df = pd.DataFrame(result)
+    return result_df if not result_df.empty else "No recommendations found"

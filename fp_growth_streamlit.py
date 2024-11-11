@@ -121,39 +121,6 @@ def main():
         st.write("Please select at least one product to get recommendations.")
 
 
-    # with st.form(key='recommendation_form'):
-    #     product_id = st.text_input("Enter a Product ID (e.g., '22326')", "22326").strip()
-    #     num_of_products_input = st.text_input("Enter the Number of Products to Recommend", "5")
-    #     submit_recommendation = st.form_submit_button(label='Run Recommendation', on_click=run_recommendation_click)
-
-    # try:
-    #     num_of_products = int(num_of_products_input)
-    #     if num_of_products <= 0:
-    #         st.error("Number of products must be a positive integer.")
-    #         num_of_products = 5
-    # except ValueError:
-    #     st.error("Please enter a valid integer for the number of products.")
-    #     num_of_products = 5
-
-    # if st.session_state.clicks.get('run_recommendation', False):
-    #     # Generate recommendations if Apriori was run
-    #     if st.session_state.clicks.get('run_fpgrowth', False):
-    #         try:
-    #             recommended_products = recommendation_system_func(df, product_id, num_of_products, st.session_state['sorted_rules'])
-    #             if recommended_products:
-    #                 if recommended_products == "Invalid Product ID":
-    #                     st.warning("Invalid Product ID. Please enter a valid Product ID.")
-    #                 else:
-    #                     product_name = check_id(df, product_id)[1]
-    #                     st.markdown(f"#### Recommended Products with id: {product_id} - name: {product_name}")
-    #                     recommended_df = pd.DataFrame(recommended_products, columns=["product_id", "name"])
-    #                     st.write(recommended_df)
-    #             else:
-    #                 st.warning("No recommendations found for the given Product ID.")
-    #         except Exception as e:
-    #             st.error(f"An error occurred while generating recommendations: {e}")
-    #     else:
-    #         st.warning("Please run the FP Growth algorithm first to get recommendations.")
 
 if __name__ == "__main__":
     main()
@@ -165,48 +132,3 @@ if __name__ == "__main__":
 
 
 
-# try:
-#     dataset = pd.read_excel('online_retail_II.xlsx', sheet_name='Year 2010-2011')
-#     dataset['StockCode'] = dataset['StockCode'].astype(str)
-#     st.write(dataset.head())
-
-#     dataset = preprocess_data(dataset)
-# except FileNotFoundError:
-#     st.error("The dataset file 'online_retail_II.xlsx' was not found. Please check the file path.")
-#     # Tiền xử lý dữ liệu
-#     # te = TransactionEncoder()
-#     # te_ary = te.fit(transactions).transform(transactions)
-#     # df = pd.DataFrame(te_ary, columns=te.columns_)
-#     # st.write("Dataframe của các giao dịch:")
-#     # st.write(df)
-
-#     # Chọn min_support và tìm tập phổ biến
-# with st.form(key='apriori_form'):
-#         min_support = st.slider("Minimum Support Value", min_value=0.0, max_value=0.99, value=0.05, key='support_slider')
-#         min_confidence = st.slider("Minimum Confidence Value", min_value=0.0, max_value=0.99, value=0.01, key='confidence_slider')
-#         submit_button = st.form_submit_button(label='Run Apriori', on_click=run_pf_growth_click)
-
-# frequent_itemsets = perform_fpgrowth(dataset, min_support=min_support)
-# st.write("Tập phổ biến:")
-# st.table(frequent_itemsets)
-
-#     # Bước 2: Chọn các item cho nhóm A và nhóm B
-# items = list(dataset.columns)
-# group_A = st.multiselect("Select items for Group A", items)
-# group_B = st.multiselect("Select items for Group B", items)
-
-# if group_A and group_B:
-#         # Tính support của A và B
-#     set_A = set(group_A)
-#     set_B = set(group_B)
-
-#         # Tính Support(A ∪ B) và Support(A)
-#     support_A = dataset[dataset[group_A].all(axis=1)].shape[0] / dataset.shape[0]
-#     support_A_union_B = dataset[dataset[group_A + group_B].all(axis=1)].shape[0] / dataset.shape[0]
-
-#         # Tính Confidence(A ⇒ B) = Support(A ∪ B) / Support(A)
-#     if support_A > 0:
-#         confidence_A_to_B = support_A_union_B / support_A
-#         st.write(f"Độ tin cậy (confidence) của luật A ⇒ B là: {confidence_A_to_B:.2f}")
-#     else:
-#         st.write("Support của nhóm A bằng 0 nên không thể tính độ tin cậy.")
