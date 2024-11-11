@@ -91,7 +91,7 @@ def main():
         if st.session_state['items'] is not None and st.session_state['rules'] is not None:
             st.markdown("## LIST OF FREQUENT ITEMSETS AND ASSOCIATION RULES")
             st.markdown(f"### min_support: {support}  min_confidence: {confidence}")
-            st.markdown("### Frequent Itemsets")
+            st.markdown("### Generating Association Rules from Frequent Itemsets")
             st.write(f"Number of frequent itemsets: {len(st.session_state['items'])}")
             st.write(pd.DataFrame(st.session_state['items']).head(10))
 
@@ -101,7 +101,7 @@ def main():
 
     # Product Recommendation Section
     st.markdown('---')
-    st.markdown("### Recommend Products based on a Product ID")
+    st.markdown("### Recommend Products based on a Product ID and association rules")
 
     with st.form(key='recommendation_form'):
         product_id = st.text_input("Enter a Product ID (e.g., '22326')", "22326").strip()

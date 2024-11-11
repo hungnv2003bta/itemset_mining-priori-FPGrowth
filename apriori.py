@@ -47,7 +47,8 @@ def runApriori(data, minSupport, minConfidence):
     # gr_inv_pro_df = preprocessData(data)
 
     frequent_itemsets = apriori(data, min_support=minSupport, use_colnames=True)
-    rules = association_rules(frequent_itemsets, num_itemsets=len(frequent_itemsets), metric="support", min_threshold=minConfidence)
+    
+    rules = association_rules(frequent_itemsets, metric="support",num_itemsets=len(frequent_itemsets), min_threshold=minSupport)
 
     sorted_rules = rules.sort_values("support", ascending=False)
     return frequent_itemsets, sorted_rules
@@ -63,7 +64,8 @@ def to_str_results(frequent_itemsets, rules):
         antecedents = set(row['antecedents'])
         consequents = set(row['consequents'])
         confidence = row['confidence']
-        rules_str.append(f"Rule: {antecedents} ==> {consequents}, confidence: {confidence:.3f}")
+        support = row['support']
+        rules_str.append(f"Rule: {antecedents} ==> {consequents},support : {support:.3f}, confidence: {confidence:.3f}")
 
     return itemsets_str, rules_str
 
@@ -81,7 +83,7 @@ def recommendation_system(product_id, num_of_products, sorted_rules):
             # Check if the product_id is in the antecedents
             if product_id in antecedents:
                 # Add consequents to recommendations
-                recommendation_list.append(list(sorted_rules.iloc[idx]['consequents'])[0])
+                recommendation_list.extend(list(consequents))
                 recommendation_list = list( dict.fromkeys(recommendation_list) )
 
         # # Convert to list and limit the number of products
