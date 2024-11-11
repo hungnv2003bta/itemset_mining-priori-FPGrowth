@@ -94,18 +94,6 @@ def recommendation_system(input_products, num_of_products, rules_df):
     recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)
     return recommendations[:num_of_products]
 
-# def recommendation_system_func(df, product_id, num_of_products, sorted_rules):
-    # if product_id in list(df["StockCode"]):
-    #     recommendation_list = recommendation_system(product_id, num_of_products, sorted_rules)
-    #     result = []
-    #     if len(recommendation_list) == 0:
-    #         return "No recommendations found for the given Product ID."
-    #     else:
-    #         for i in range(len(recommendation_list[:num_of_products])):
-    #             result.append(check_id(df, recommendation_list[i]))
-    #     return result
-    # else: 
-    #     return "Invalid Product ID"
 def recommendation_system_func(df, input_products, num_of_products, rules_df):    
     recommendations = recommendation_system(input_products, num_of_products, rules_df)
     result = []

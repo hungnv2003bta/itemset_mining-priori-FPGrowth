@@ -98,8 +98,7 @@ def main():
             st.markdown("### Frequent Itemsets")
             st.write(f"Number of frequent itemsets: {len(st.session_state['items'])}")
             st.write(pd.DataFrame(st.session_state['items']).head(10))
-          
-
+            
             st.markdown("### Association Rules")
             st.write(f"Number of association rules: {len(st.session_state['rules'])}")
             st.write(pd.DataFrame(st.session_state['rules']).head(10))

@@ -69,28 +69,6 @@ def to_str_results(frequent_itemsets, rules):
 
     return itemsets_str, rules_str
 
-# def recommendation_system(product_ids, num_of_products, sorted_rules):
-#     # Validate input
-#     if not sorted_rules.empty and 'antecedents' in sorted_rules.columns and 'consequents' in sorted_rules.columns:
-#         # Initialize recommendation set to avoid duplicates
-#         recommendation_list = []
-
-#         # Iterate through the rules
-#         for idx, row in sorted_rules.iterrows():
-#             # antecedents = row['antecedents']
-#             antecedents = set(row['antecedents'])
-#             consequents = row['consequents']
-#             confidence = row['confidence']
-
-#             if antecedents.issubset(set(product_ids)):
-#                 for consequent in consequents:
-#                     recommendation_list.append((consequent, confidence))
-                    
-#         recommendation_list = sorted(recommendation_list, key=lambda x: x[1], reverse=True)
-#         return recommendation_list[0:num_of_products] if recommendation_list else ["No recommendations found"]
-#     else:
-#         return ["Invalid sorted_rules data"]
-
 def recommendation_system(input_products, num_of_products, rules_df):    
     recommendations = []
 
@@ -99,13 +77,17 @@ def recommendation_system(input_products, num_of_products, rules_df):
         consequents = rule['consequents']
         confidence = rule['confidence']
         
-        # Check if all input products are in the antecedents of the rule
         if antecedents.issubset(set(input_products)):
             for consequent in consequents:
                 recommendations.append((consequent, confidence))
                 
-    # Sort by confidence and return the top N recommendations
+    # Sort by confidence and return the top N recommendations and drop duplicates and keep the highest confidence
     recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)
+    unique_recommendations = {}
+    for product, confidence in recommendations:
+        if product not in unique_recommendations:
+            unique_recommendations[product] = confidence
+    recommendations = [(product, confidence) for product, confidence in unique_recommendations.items()]
     return recommendations[:num_of_products]
 
 def recommendation_system_func(df, input_products, num_of_products, sorted_rules):    
