@@ -58,25 +58,11 @@ def to_str_results(frequent_itemsets, rules):
         antecedents = set(row['antecedents'])
         consequents = set(row['consequents'])
         confidence = row['confidence']
-        rules_str.append(f"Rule: {antecedents} ==> {consequents}, confidence: {confidence:.3f}")
+        support = row['support']
+        rules_str.append(f"Rule: {antecedents} ==> {consequents},support : {support:.3f}, confidence: {confidence:.3f}")
 
     return itemsets_str, rules_str
 
-# def recommendation_system(product_id, num_of_products, sorted_rules):
-    # if not sorted_rules.empty and 'antecedents' in sorted_rules.columns and 'consequents' in sorted_rules.columns:
-    #     recommendation_list = []
-
-    #     for idx, row in sorted_rules.iterrows():
-    #         antecedents = row['antecedents']
-    #         consequents = row['consequents']
-
-    #         if product_id in antecedents:
-    #             recommendation_list.append(list(consequents)[0])
-    #             recommendation_list = list(dict.fromkeys(recommendation_list))
-
-    #     return recommendation_list[:num_of_products] if recommendation_list else ["No recommendations found"]
-    # else:
-    #     return ["Invalid sorted_rules data"]
 def recommendation_system(input_products, num_of_products, rules_df):    
     recommendations = []
 
@@ -92,7 +78,13 @@ def recommendation_system(input_products, num_of_products, rules_df):
                 
     # Sort by confidence and return the top N recommendations
     recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)
+    unique_recommendations = {}
+    for product, confidence in recommendations:
+        if product not in unique_recommendations:
+            unique_recommendations[product] = confidence
+    recommendations = [(product, confidence) for product, confidence in unique_recommendations.items()]
     return recommendations[:num_of_products]
+
 
 def recommendation_system_func(df, input_products, num_of_products, rules_df):    
     recommendations = recommendation_system(input_products, num_of_products, rules_df)
@@ -103,4 +95,5 @@ def recommendation_system_func(df, input_products, num_of_products, rules_df):
             product_name = df[df['StockCode'] == product_id]['Description'].values[0]
             result.append({'ProductID': product_id, 'ProductName': product_name, 'Confidence': confidence})
     
-    return pd.DataFrame(result) if result else "No recommendations found"
+    result_df = pd.DataFrame(result)
+    return result_df if not result_df.empty else "No recommendations found"
